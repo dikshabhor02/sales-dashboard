@@ -13,7 +13,6 @@ function App() {
 
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
-
   const [showForm, setShowForm] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -23,43 +22,35 @@ function App() {
     sale_date: "",
   });
 
-  // Get sales
   const fetchSales = () => {
-    fetch("http://localhost:8080/sales-dashboard/backend/sales.php")
+    fetch("/api/sales.php")
       .then((response) => response.json())
       .then((data) => setSales(data))
-      .catch((error) => console.error(error));
+      .catch((error) => console.error("SALES ERROR:", error));
   };
 
-  // Get dashboard
   const fetchDashboard = () => {
-    fetch("http://localhost:8080/sales-dashboard/backend/dashboard.php")
+    fetch("/api/dashboard.php")
       .then((response) => response.json())
       .then((data) => setDashboard(data))
-      .catch((error) => console.error(error));
+      .catch((error) => console.error("DASHBOARD ERROR:", error));
   };
 
-  // Get customers
   useEffect(() => {
-    fetch("http://localhost:8080/sales-dashboard/backend/customers.php")
+    fetch("/api/customers.php")
       .then((response) => response.json())
-      .then((data) => setCustomers(data));
-  }, []);
+      .then((data) => setCustomers(data))
+      .catch((error) => console.error("CUSTOMERS ERROR:", error));
 
-  // Get products
-  useEffect(() => {
-    fetch("http://localhost:8080/sales-dashboard/backend/products.php")
+    fetch("/api/products.php")
       .then((response) => response.json())
-      .then((data) => setProducts(data));
-  }, []);
+      .then((data) => setProducts(data))
+      .catch((error) => console.error("PRODUCTS ERROR:", error));
 
-  // Initial data
-  useEffect(() => {
     fetchSales();
     fetchDashboard();
   }, []);
 
-  // Form input change
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -67,11 +58,10 @@ function App() {
     });
   };
 
-  // Add sale
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    fetch("http://localhost:8080/sales-dashboard/backend/add_sale.php", {
+    fetch("/api/add_sale.php", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -91,7 +81,6 @@ function App() {
           });
 
           setShowForm(false);
-
           fetchSales();
           fetchDashboard();
         } else {
@@ -99,7 +88,7 @@ function App() {
         }
       })
       .catch((error) => {
-        console.error(error);
+        console.error("ADD SALE ERROR:", error);
         alert("Something went wrong!");
       });
   };
@@ -136,12 +125,12 @@ function App() {
 
         {showForm && (
           <section className="form-section">
-
             <h2>Add New Sale</h2>
 
             <form onSubmit={handleSubmit}>
 
               <label>Customer</label>
+
               <select
                 name="customer_id"
                 value={formData.customer_id}
@@ -158,6 +147,7 @@ function App() {
               </select>
 
               <label>Product</label>
+
               <select
                 name="product_id"
                 value={formData.product_id}
@@ -174,6 +164,7 @@ function App() {
               </select>
 
               <label>Quantity</label>
+
               <input
                 type="number"
                 name="quantity"
@@ -184,6 +175,7 @@ function App() {
               />
 
               <label>Sale Date</label>
+
               <input
                 type="date"
                 name="sale_date"
@@ -193,6 +185,7 @@ function App() {
               />
 
               <div className="form-buttons">
+
                 <button type="submit" className="save-button">
                   Save Sale
                 </button>
@@ -204,10 +197,10 @@ function App() {
                 >
                   Cancel
                 </button>
+
               </div>
 
             </form>
-
           </section>
         )}
 
@@ -242,6 +235,7 @@ function App() {
           <h2>Recent Sales</h2>
 
           <table>
+
             <thead>
               <tr>
                 <th>ID</th>
@@ -254,24 +248,32 @@ function App() {
             </thead>
 
             <tbody>
+
               {sales.map((sale) => (
                 <tr key={sale.id}>
+
                   <td>{sale.id}</td>
                   <td>{sale.customer_name}</td>
                   <td>{sale.product_name}</td>
                   <td>{sale.quantity}</td>
+
                   <td>
                     ₹{Number(sale.total_amount).toLocaleString()}
                   </td>
+
                   <td>{sale.sale_date}</td>
+
                 </tr>
               ))}
+
             </tbody>
+
           </table>
 
         </section>
 
       </main>
+
     </div>
   );
 }
