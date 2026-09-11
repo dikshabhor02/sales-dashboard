@@ -1,18 +1,99 @@
-import { useEffect, useState } from "react";
+
+import { useState } from "react";
 import "./App.css";
 
 function App() {
-  const [sales, setSales] = useState([]);
+  const [sales, setSales] = useState([
+    {
+      id: 9,
+      customer_name: "Amit Singh",
+      product_name: "Keyboard",
+      quantity: 1,
+      total_amount: 1500,
+      sale_date: "2026-09-11",
+    },
+    {
+      id: 8,
+      customer_name: "Priya Patil",
+      product_name: "Monitor",
+      quantity: 2,
+      total_amount: 24000,
+      sale_date: "2026-09-08",
+    },
+    {
+      id: 7,
+      customer_name: "Amit Singh",
+      product_name: "Laptop",
+      quantity: 1,
+      total_amount: 55000,
+      sale_date: "2026-09-07",
+    },
+    {
+      id: 6,
+      customer_name: "Rahul Sharma",
+      product_name: "Smartphone",
+      quantity: 1,
+      total_amount: 25000,
+      sale_date: "2026-09-06",
+    },
+    {
+      id: 5,
+      customer_name: "Rohan More",
+      product_name: "Monitor",
+      quantity: 1,
+      total_amount: 12000,
+      sale_date: "2026-09-05",
+    },
+    {
+      id: 4,
+      customer_name: "Sneha Joshi",
+      product_name: "Keyboard",
+      quantity: 2,
+      total_amount: 3000,
+      sale_date: "2026-09-04",
+    },
+    {
+      id: 3,
+      customer_name: "Amit Singh",
+      product_name: "Headphones",
+      quantity: 3,
+      total_amount: 7500,
+      sale_date: "2026-09-03",
+    },
+    {
+      id: 2,
+      customer_name: "Priya Patil",
+      product_name: "Smartphone",
+      quantity: 2,
+      total_amount: 50000,
+      sale_date: "2026-09-02",
+    },
+    {
+      id: 1,
+      customer_name: "Rahul Sharma",
+      product_name: "Laptop",
+      quantity: 1,
+      total_amount: 55000,
+      sale_date: "2026-09-01",
+    },
+  ]);
 
-  const [dashboard, setDashboard] = useState({
-    total_sales: 0,
-    total_orders: 0,
-    total_customers: 0,
-    total_products: 0,
-  });
+  const customers = [
+    { id: 1, name: "Rahul Sharma" },
+    { id: 2, name: "Priya Patil" },
+    { id: 3, name: "Amit Singh" },
+    { id: 4, name: "Sneha Joshi" },
+    { id: 5, name: "Rohan More" },
+  ];
 
-  const [customers, setCustomers] = useState([]);
-  const [products, setProducts] = useState([]);
+  const products = [
+    { id: 1, product_name: "Laptop", price: 55000 },
+    { id: 2, product_name: "Smartphone", price: 25000 },
+    { id: 3, product_name: "Headphones", price: 2500 },
+    { id: 4, product_name: "Keyboard", price: 1500 },
+    { id: 5, product_name: "Monitor", price: 12000 },
+  ];
+
   const [showForm, setShowForm] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -22,34 +103,10 @@ function App() {
     sale_date: "",
   });
 
-  const fetchSales = () => {
-    fetch("/api/sales.php")
-      .then((response) => response.json())
-      .then((data) => setSales(data))
-      .catch((error) => console.error("SALES ERROR:", error));
-  };
-
-  const fetchDashboard = () => {
-    fetch("/api/dashboard.php")
-      .then((response) => response.json())
-      .then((data) => setDashboard(data))
-      .catch((error) => console.error("DASHBOARD ERROR:", error));
-  };
-
-  useEffect(() => {
-    fetch("/api/customers.php")
-      .then((response) => response.json())
-      .then((data) => setCustomers(data))
-      .catch((error) => console.error("CUSTOMERS ERROR:", error));
-
-    fetch("/api/products.php")
-      .then((response) => response.json())
-      .then((data) => setProducts(data))
-      .catch((error) => console.error("PRODUCTS ERROR:", error));
-
-    fetchSales();
-    fetchDashboard();
-  }, []);
+  const totalSales = sales.reduce(
+    (total, sale) => total + Number(sale.total_amount),
+    0
+  );
 
   const handleChange = (e) => {
     setFormData({
@@ -61,36 +118,38 @@ function App() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    fetch("/api/add_sale.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          alert("Sale added successfully!");
+    const customer = customers.find(
+      (c) => c.id === Number(formData.customer_id)
+    );
 
-          setFormData({
-            customer_id: "",
-            product_id: "",
-            quantity: 1,
-            sale_date: "",
-          });
+    const product = products.find(
+      (p) => p.id === Number(formData.product_id)
+    );
 
-          setShowForm(false);
-          fetchSales();
-          fetchDashboard();
-        } else {
-          alert(data.message);
-        }
-      })
-      .catch((error) => {
-        console.error("ADD SALE ERROR:", error);
-        alert("Something went wrong!");
-      });
+    const quantity = Number(formData.quantity);
+    const totalAmount = product.price * quantity;
+
+    const newSale = {
+      id: sales.length + 1,
+      customer_name: customer.name,
+      product_name: product.product_name,
+      quantity: quantity,
+      total_amount: totalAmount,
+      sale_date: formData.sale_date,
+    };
+
+    setSales([newSale, ...sales]);
+
+    setFormData({
+      customer_id: "",
+      product_id: "",
+      quantity: 1,
+      sale_date: "",
+    });
+
+    setShowForm(false);
+
+    alert("Sale added successfully!");
   };
 
   return (
@@ -209,23 +268,23 @@ function App() {
           <div className="card">
             <h3>Total Sales</h3>
             <h2>
-              ₹{Number(dashboard.total_sales).toLocaleString()}
+              ₹{totalSales.toLocaleString()}
             </h2>
           </div>
 
           <div className="card">
             <h3>Total Orders</h3>
-            <h2>{dashboard.total_orders}</h2>
+            <h2>{sales.length}</h2>
           </div>
 
           <div className="card">
             <h3>Total Customers</h3>
-            <h2>{dashboard.total_customers}</h2>
+            <h2>{customers.length}</h2>
           </div>
 
           <div className="card">
             <h3>Total Products</h3>
-            <h2>{dashboard.total_products}</h2>
+            <h2>{products.length}</h2>
           </div>
 
         </section>
@@ -279,3 +338,4 @@ function App() {
 }
 
 export default App;
+
